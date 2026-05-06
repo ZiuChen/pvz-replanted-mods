@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>PvZReplantedVaseReveal</AssemblyName>
+    <RootNamespace>PvZReplantedVaseReveal</RootNamespace>
+    <InteropRefDir Condition="'$(InteropRefDir)' == ''">$(MSBuildProjectDirectory)\InteropRefs</InteropRefDir>
+  </PropertyGroup>
+</Project>
