@@ -1,0 +1,27 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PvZReplantedEndlessHelper", "mods\pvz-replanted-endless-helper\PvZReplantedEndlessHelper.csproj", "{A2EA5BE3-9E2B-4554-A570-D8D81425B52D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PvZReplantedVaseReveal", "mods\pvz-replanted-vase-reveal\PvZReplantedVaseReveal.csproj", "{EA7D06D8-8079-4D30-B9F2-4A7130C982B4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A2EA5BE3-9E2B-4554-A570-D8D81425B52D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2EA5BE3-9E2B-4554-A570-D8D81425B52D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2EA5BE3-9E2B-4554-A570-D8D81425B52D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2EA5BE3-9E2B-4554-A570-D8D81425B52D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA7D06D8-8079-4D30-B9F2-4A7130C982B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA7D06D8-8079-4D30-B9F2-4A7130C982B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA7D06D8-8079-4D30-B9F2-4A7130C982B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA7D06D8-8079-4D30-B9F2-4A7130C982B4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
