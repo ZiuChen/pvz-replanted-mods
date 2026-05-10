@@ -15,9 +15,9 @@ internal static class BoardInitPatch
         try
         {
             GameplayActivity app = __instance?.mApp;
-            Core.CurrentBoard = __instance;
-            Core.CurrentGameplayActivity = app;
-            Core.IsCoopEndless = app != null && app.IsCoopMode();
+            bool isCoop = app != null && app.IsCoopMode();
+            Core.IsCoopEndless = isCoop;
+            MelonLoader.MelonLogger.Msg($"[EndlessHelper] BoardInitPatch: IsCoopMode={isCoop}");
         }
         catch (System.Exception ex)
         {

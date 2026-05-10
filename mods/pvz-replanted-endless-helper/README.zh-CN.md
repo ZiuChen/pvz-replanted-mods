@@ -2,7 +2,7 @@
 
 英文文档： [README.md](README.md)
 
-> 适用于「植物大战僵尸：重植版」（PvZ: Replanted）的 MelonLoader Mod，在合作无尽模式中自动解除阳光上限并清空种植冷却，同时提供黑卡槽防崩溃保护。
+> 适用于「植物大战僵尸：重植版」（PvZ: Replanted）的 MelonLoader Mod，在合作无尽模式中自动解除阳光上限、清空种植冷却，并修复 P2 手柄断联后的重连识别问题，同时提供黑卡槽防崩溃保护。
 
 ## 功能
 
@@ -10,12 +10,13 @@
 |------|----------|------|
 | 自动无限阳光 | 合作无尽 | 通过 `Board.AddSunMoney` 的前后置补丁恢复原本会被 9990 截断的阳光值。 |
 | 自动无冷却 | 合作无尽 | 在种植后立即清空 `SeedPacket` 的刷新计数，并同步清理种子栏的冷却遮罩。 |
+| P2 手柄重连修复 | 合作无尽 | 记录 P2 最近一次设备 ID，在手柄断联后重新插入时优先恢复 Guest 玩家绑定。 |
 | 黑卡槽保护 | 全局 | 阻止 `SeedType.None` 被拾取，避免种子选择到实战过渡时的黑卡槽崩溃。 |
 | 模式缓存 | 内部 | 在每次 `Board.InitLevel` 后缓存 `IsCoopMode()`，避免高频补丁反复查询。 |
 
 - 除了黑卡槽保护外，其余游戏性补丁只在合作无尽模式下生效。
 - 没有 F1 / F2 热键；进入合作无尽关卡后会自动启用。
-- 每次绕过阳光上限时，MelonLoader 控制台会输出一条日志。
+- 每次绕过阳光上限或重新绑定 P2 时，MelonLoader 控制台都会输出日志。
 
 ## 前置条件
 
@@ -63,6 +64,7 @@ pvz-replanted-mods/
         ├── Core.cs
         ├── SunCapPatch.cs
         ├── CooldownPatch.cs
+        ├── GamepadReconnectPatch.cs
         ├── PvZReplantedEndlessHelper.csproj
         ├── README.md
         └── README.zh-CN.md
@@ -79,6 +81,10 @@ pvz-replanted-mods/
 ### 自动无冷却
 
 `SeedPacket.mRefreshCounter` 会从 `mRefreshTime` 倒数到 0，期间卡片会显示灰色冷却遮罩。Mod 在 `SeedPacket.WasPlanted`、`SeedBankEntryModel.OnTick` 和 `SeedBankEntryModel.UpdateModelData` 里清空刷新状态，让真实植物卡片在合作无尽中立刻恢复可用。
+
+### P2 手柄重连修复
+
+Mod 会跟踪 P2 最近一次绑定的 `DeviceId`。当 Guest 手柄断联并重新插入后，`GuestPlayerInputActivity` 会优先把该设备重新绑定到 P2，避免两个手柄同时落到 P1。
 
 ### 黑卡槽保护
 
