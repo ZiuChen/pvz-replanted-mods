@@ -6,19 +6,18 @@ namespace PvZReplantedEndlessHelper;
 
 // Root cause:
 //   Board maintains a per-player CursorObjects (MultiplayerType<CursorObject>), but
-//   Board.MouseDown routes based on the singular mCursorObject, which always reflects
-//   the P1 cursor.  When P2 arms a CobCannon, P2's cursor type becomes CobCannonTarget
-//   in CursorObjects[1], but the routing check sees mCursorObject (P1, type Normal) and
-//   never dispatches to MouseDownCobcannonFire — so P2's fire click does nothing.
-//   Because mCursorObject is also what MouseDownCobcannonFire uses to look up the armed
-//   plant ID, a second swap-without-restore bug caused P1 to fire a bonus shot when P1
-//   also had the cannon armed as a workaround.
+//   Board.MouseDown routes based on the singular mCursorObject.  mCursorObject is a
+//   shared mutable reference: whichever player most recently armed a CobCannon wins,
+//   overwriting the other player's state.  This means:
+//     - P2 arms cannon B  → mCursorObject now points to B
+//     - P1 fires          → routing reads mCursorObject (B) and fires B instead of A
+//     - P2 fires          → our old patch swaps to CursorObjects[1] (also B) → B fires again
 //
 // Fix:
-//   In the Prefix of Board.MouseDown, when playerIndex > 0 and that player's cursor is
-//   in CobCannonTarget mode, temporarily replace mCursorObject with CursorObjects[playerIndex].
-//   The native method then routes and executes the fire correctly.  The Postfix restores
-//   mCursorObject so P1's state is unaffected.
+//   For ANY playerIndex, when that player's CursorObjects[playerIndex] is in
+//   CobCannonTarget mode, temporarily replace mCursorObject with the player's own cursor
+//   before the native method runs, then restore it.  Each player's fire click now always
+//   uses their own per-player cursor regardless of which cannon the other player selected.
 
 [HarmonyPatch(typeof(Board), nameof(Board.MouseDown))]
 internal static class CobCannonMouseDownPatch
@@ -28,14 +27,14 @@ internal static class CobCannonMouseDownPatch
     private static void Prefix(Board __instance, int playerIndex)
     {
         _savedCursor = null;
-        if (!Core.IsCoopEndless || playerIndex == 0) return;
+        if (!Core.IsCoopEndless) return;
         try
         {
             var playerCursor = __instance.CursorObjects[playerIndex];
             if (playerCursor == null || playerCursor.mCursorType != CursorType.CobCannonTarget) return;
             _savedCursor = __instance.mCursorObject;
             __instance.mCursorObject = playerCursor;
-            MelonLogger.Msg($"[EndlessHelper] CobCannon: routing P{playerIndex + 1} fire click via correct cursor.");
+            MelonLogger.Msg($"[EndlessHelper] CobCannon: routing P{playerIndex + 1} fire click via correct cursor (cannon {playerCursor.mCobCannonPlantID}).");
         }
         catch (Exception ex)
         {

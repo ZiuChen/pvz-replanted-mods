@@ -10,7 +10,7 @@
 |------|----------|------|
 | 自动无限阳光 | 合作无尽 | 通过 `Board.AddSunMoney` 的前后置补丁恢复原本会被 9990 截断的阳光值。 |
 | 自动无冷却 | 合作无尽 | 在种植后立即清空 `SeedPacket` 的刷新计数，并同步清理种子栏的冷却遮罩。 |
-| 玉米加农炮 P2 修复 | 合作无尽 | 修复 `Board.MouseDown` 的路由判断，使 P2 的发射点击使用正确的 per-player cursor，P2 无需 P1 同时瞄准即可独立发射。 |
+| 玉米加农炮多人修复 | 合作无尽 | 修复 `Board.MouseDown` 的路由判断，对所有玩家均使用 `CursorObjects[playerIndex]`（per-player cursor），防止共享的 `mCursorObject` 被后选炮的玩家覆盖而导致误打对方的炮。 |
 | P2 手柄重连修复 | 合作无尽 | 记录 P2 最近一次设备 ID，在手柄断联后重新插入时优先恢复 Guest 玩家绑定。 |
 | 黑卡槽保护 | 全局 | 阻止 `SeedType.None` 被拾取，避免种子选择到实战过渡时的黑卡槽崩溃。 |
 | 模式缓存 | 内部 | 在每次 `Board.InitLevel` 后缓存 `IsCoopMode()`，避免高频补丁反复查询。 |
@@ -84,9 +84,9 @@ pvz-replanted-mods/
 
 `SeedPacket.mRefreshCounter` 会从 `mRefreshTime` 倒数到 0，期间卡片会显示灰色冷却遮罩。Mod 在 `SeedPacket.WasPlanted`、`SeedBankEntryModel.OnTick` 和 `SeedBankEntryModel.UpdateModelData` 里清空刷新状态，让真实植物卡片在合作无尽中立刻恢复可用。
 
-### 玉米加农炮 P2 修复
+### 玉米加农炮多人修复
 
-`Board.MouseDown` 内部依赖 `mCursorObject.mCursorType` 判断点击类型，但 `mCursorObject` 始终指向 P1 的 cursor（类型为 `Normal`）。当 P2 瞄准炮击目标时，其 cursor 存储于 `Board.CursorObjects[1]`，路由逻辑从不读取该值，导致 P2 的发射点击被丢弃。Mod 在 `Board.MouseDown` 的 Prefix/Postfix 里临时将 `mCursorObject` 替换为 `CursorObjects[playerIndex]`，使路由逻辑能正确识别 `CobCannonTarget`，再还原原值。
+`mCursorObject` 是全局共享的可变引用，每次有玩家选中加农炮时都会被覆盖。当 P1 选中炮 A、P2 选中炮 B 时，P2 的选中动作会将 `mCursorObject` 更新为指向 B，导致 P1 发射时读到 B（打出 B）、P2 随后发射时也读到 B（再打一次 B）。Mod 对所有 playerIndex 统一处理：在 `Board.MouseDown` 的 Prefix 里读取 `CursorObjects[playerIndex]`（per-player cursor），临时替换 `mCursorObject`，原生逻辑执行后在 Postfix 还原。每名玩家的发射点击始终使用自己选中的那门炮。
 
 ### P2 手柄重连修复
 

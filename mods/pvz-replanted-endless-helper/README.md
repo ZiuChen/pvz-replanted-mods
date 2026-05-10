@@ -10,7 +10,7 @@ MelonLoader mod for PvZ Replanted that automatically applies cooperative endless
 |----------|-------|-------|
 | Unlimited sun | Co-op endless only | Bypasses the native 9990 cap by restoring the unclamped value after `Board.AddSunMoney`. |
 | Instant seed cooldown | Co-op endless only | Clears `SeedPacket` refresh state and the seed bank cooldown overlay immediately after planting, then keeps the UI in sync during later ticks. |
-| Cob Cannon P2 fix | Co-op endless only | Patches `Board.MouseDown` routing so P2's fire click is dispatched with the correct per-player cursor, allowing P2 to fire independently without P1 also aiming at the same cannon. |
+| Cob Cannon P2 fix | Co-op endless only | Patches `Board.MouseDown` to always route each player's fire click through their own per-player cursor (`CursorObjects[playerIndex]`), preventing the shared `mCursorObject` from causing cross-player cannon misfires. |
 | P2 reconnect recovery | Co-op endless only | Tracks the guest controller identity and rebinds it to player 2 after reconnects. |
 | Black-slot guard | All modes | Blocks `SeedType.None` packets from being picked up, which avoids the crash that can happen during the seed-selection to gameplay transition. |
 | Mode cache | Internal | Caches `GameplayActivity.IsCoopMode()` on each level load so the patches do not query it every frame. |
@@ -78,7 +78,7 @@ The main flow in this repository is:
 1. `Core.cs` initializes the mod and patches the assembly.
 2. `SunCapPatch.cs` caches whether the current level is co-op endless, then patches `Board.AddSunMoney` to restore the unclamped sun total through the backing array.
 3. `CooldownPatch.cs` keeps seed packets ready in co-op endless by clearing refresh state in `SeedPacket.WasPlanted`, `SeedBankEntryModel.OnTick`, and `SeedBankEntryModel.UpdateModelData`.
-4. `CobCannonPatch.cs` fixes P2 Cob Cannon firing: `Board.MouseDown` always routed clicks through `mCursorObject` (P1's cursor), so P2's fire click was dropped. The patch temporarily swaps `mCursorObject` with `CursorObjects[playerIndex]` in a Prefix/Postfix pair so P2's click sees the correct cursor type and is dispatched to `MouseDownCobcannonFire`.
+4. `CobCannonPatch.cs` fixes Cob Cannon firing in co-op: `mCursorObject` is a shared mutable reference updated by whichever player most recently armed a cannon, so when P1 has cannon A and P2 has cannon B, P2 selecting B overwrites `mCursorObject` with B's state — causing P1 to fire B and P2 to fire B again. The patch applies to every `playerIndex`: it reads `CursorObjects[playerIndex]` (the per-player cursor) and temporarily swaps it into `mCursorObject` before the native call, then restores the original value in the Postfix. Each player now always fires their own cannon.
 5. `GamepadReconnectPatch.cs` tracks the last guest device and restores P2 ownership when an unpaired controller reconnects.
 6. `CooldownPatch.cs` also blocks `SeedType.None` packets in `SeedPacket.CanPickUp`, which prevents the black-slot crash.
 
