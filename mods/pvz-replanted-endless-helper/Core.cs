@@ -5,7 +5,7 @@ using Il2CppReloaded.Gameplay;
 using Il2CppReloaded.TreeStateActivities;
 using Il2CppSteamworks;
 
-[assembly: MelonInfo(typeof(PvZReplantedEndlessHelper.Core), "pvz-replanted-endless-helper", "1.1.0", "Copilot")]
+[assembly: MelonInfo(typeof(PvZReplantedEndlessHelper.Core), "pvz-replanted-endless-helper", "1.2.0", "Copilot")]
 [assembly: MelonGame("PopCap Games", "PvZ Replanted")]
 
 namespace PvZReplantedEndlessHelper;
